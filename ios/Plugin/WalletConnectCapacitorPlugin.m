@@ -8,4 +8,5 @@ CAP_PLUGIN(WalletConnectCapacitorPlugin, "WalletConnectCapacitor",
             CAP_PLUGIN_METHOD(getNetworkId, CAPPluginReturnPromise);
             CAP_PLUGIN_METHOD(sign, CAPPluginReturnPromise);
             CAP_PLUGIN_METHOD(sendTransaction, CAPPluginReturnPromise);
+            CAP_PLUGIN_METHOD(sendCustomRequest, CAPPluginReturnPromise);
 )

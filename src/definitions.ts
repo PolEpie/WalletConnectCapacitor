@@ -4,7 +4,7 @@ export interface WalletConnectCapacitorPlugin {
     *
     * @since 1.0
     */
-  connect(options: { dappName: string, dappDesc: string, dappURL: string, brigeURL: string }): Promise<{ value: string }>;
+  connect(options: { dappName: string, dappDesc: string, dappURL: string, brigeURL: string, uriModel: String }): Promise<{ value: string }>;
   
   /**
     * Return network ID (Only IOS)
@@ -24,4 +24,14 @@ export interface WalletConnectCapacitorPlugin {
     * Return signed transaction
     */
   sendTransaction(options: { to: string, value: string, data: string, gas: string }): Promise<{ result: string }>;
+
+  /**
+    * Send RPC request
+    */
+  sendCustomRequest(options: { method: string, params: string[] }): Promise<{ result: string }>;
+
+  /**
+    * Add listener of event
+    */
+  addListener(name: string, callback: (info: any) => void): void;
 }

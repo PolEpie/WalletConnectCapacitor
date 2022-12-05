@@ -43,6 +43,7 @@ public class WalletConnectPlugin: CAPPlugin {
         let dappDesc = call.getString("dappDesc") ?? "DAPP Description"
         let dappURL = call.getString("dappURL") ?? "https://github.com/PolEpie/WalletConnectCapacitor"
         let bridgeURL = call.getString("brigeURL") ?? "https://j.bridge.walletconnect.org"
+        let uriModel = call.getString("uriModel") ?? "wc://wc?uri="
         
         walletConnect = WalletConnect(delegate: self)
         walletConnect.reconnectIfNeeded()
@@ -52,7 +53,7 @@ public class WalletConnectPlugin: CAPPlugin {
         /// https://docs.walletconnect.org/mobile-linking#for-ios
         /// **NOTE**: Majority of wallets support universal links that you should normally use in production application
         /// Here deep link provided for integration with server test app only
-        let deepLinkUrl = "wc://wc?uri=\(connectionUrl)"
+        let deepLinkUrl = "\(uriModel)\(connectionUrl)"
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             if let url = URL(string: deepLinkUrl), UIApplication.shared.canOpenURL(url) {
@@ -97,6 +98,37 @@ public class WalletConnectPlugin: CAPPlugin {
             
         }
     }
+
+    @objc func sendCustomRequest(_ call: CAPPluginCall) {
+        let method = call.getString("method") ?? "eth_estimateGas"
+        let params = call.getArray("params", String.self) ?? []
+        let _params: Array<String> = params;
+
+
+        try? walletConnect.client.send(.customRequest(url: walletConnect.session.url, method: method, params: _params)) { (response: Response) -> Void in
+            if let error = response.error {
+                call.reject(error.localizedDescription)
+            }
+            do {
+                let result = try response.result(as: String.self);
+                print(result)
+                call.resolve(["result": result])
+            } catch  {
+                do {
+                    let result = try response.result(as: Array<String>.self);
+                    print(result)
+                    call.resolve(["result": result])
+                } catch  {
+                    call.reject("Unexpected response type error: \(error)")
+                }
+            }
+            
+        }
+        
+        if (method == "personal_sign") {
+            openWallet()
+        }
+    }
     
     @objc func sendTransaction(_ call: CAPPluginCall) {
         let from = self.walletAccount
@@ -137,6 +169,10 @@ extension Request {
     static func eth_estimateGas(url: WCURL) -> Request {
         return Request(url: url, method: "eth_estimateGas")
     }
+
+    static func customRequest(url: WCURL, method: String, params: Array<String>) -> Request {
+        return try! Request(url: url, method: method, params: params)
+    }
 }
 
 extension WalletConnectPlugin: WalletConnectDelegate {
@@ -149,6 +185,14 @@ extension WalletConnectPlugin: WalletConnectDelegate {
 
     func didDisconnect() {
         self.notifyListeners("isDisconnected", data: [:])
+    }
+    
+    func didChangeWallet() {
+        self.notifyListeners("didChangeWallet", data: ["address": walletConnect.session.walletInfo!.accounts[0]])
+    }
+
+    func didChainChanged() {
+        self.notifyListeners("didChainChanged", data: ["chainId": walletConnect.session.walletInfo!.chainId])
     }
 }
 

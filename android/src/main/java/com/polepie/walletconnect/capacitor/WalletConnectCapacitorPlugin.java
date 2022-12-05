@@ -30,4 +30,10 @@ public class WalletConnectCapacitorPlugin extends Plugin {
     public void sendTransaction(PluginCall call) {
        call.unimplemented("Not implemented on Android.");
     }
+
+    @PluginMethod
+    public void sendCustomRequest(PluginCall call) {
+       call.unimplemented("Not implemented on Android.");
+    }
+
 }

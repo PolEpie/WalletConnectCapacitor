@@ -9,6 +9,8 @@ protocol WalletConnectDelegate {
     func failedToConnect()
     func didConnect()
     func didDisconnect()
+    func didChangeWallet()
+    func didChainChanged()
 }
 
 class WalletConnect {
@@ -21,6 +23,7 @@ class WalletConnect {
     init(delegate: WalletConnectDelegate) {
         self.delegate = delegate
     }
+
 
     func connect(dappName: String, dappDesc: String, dappURL: String, bridgeURL: String) -> String {
         // gnosis wc bridge: https://safe-walletconnect.gnosis.io/
@@ -94,6 +97,13 @@ extension WalletConnect: ClientDelegate {
     }
 
     func client(_ client: Client, didUpdate session: Session) {
-        // do nothing
+        if (self.session.walletInfo?.accounts != session.walletInfo?.accounts){
+            delegate.didChangeWallet()
+        } else if (self.session.walletInfo?.chainId != session.walletInfo?.chainId){
+            delegate.didChainChanged()
+        }
+        self.session = session
+        let sessionData = try! JSONEncoder().encode(session)
+        UserDefaults.standard.set(sessionData, forKey: sessionKey)
     }
 }

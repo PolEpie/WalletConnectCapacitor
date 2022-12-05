@@ -6,7 +6,7 @@ export class WalletConnectCapacitorWeb
   extends WebPlugin
   implements WalletConnectCapacitorPlugin
 {
-  async connect(options: { dappName: string, dappDesc: string, dappURL: string, brigeURL: string }): Promise<{ value: string }> {
+  async connect(options: { dappName: string, dappDesc: string, dappURL: string, brigeURL: string, uriModel: String }): Promise<{ value: string }> {
     console.log(options)
     throw this.unimplemented('Not implemented on web.');
   }
@@ -24,4 +24,10 @@ export class WalletConnectCapacitorWeb
     console.log(options)
     throw this.unimplemented('Not implemented on web.');
   }
+
+  async sendCustomRequest(options: { method: string, params: string[] }): Promise<{ result: string }> {
+    console.log(options)
+    throw this.unimplemented('Not implemented on web.');
+  }
+
 }
