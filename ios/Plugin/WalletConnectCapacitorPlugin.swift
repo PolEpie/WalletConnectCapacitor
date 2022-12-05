@@ -111,15 +111,18 @@ public class WalletConnectPlugin: CAPPlugin {
             }
             do {
                 let result = try response.result(as: String.self);
-                print(result)
                 call.resolve(["result": result])
             } catch  {
                 do {
-                    let result = try response.result(as: Array<String>.self);
-                    print(result)
+                    let result = try response.result(as: Int.self);
                     call.resolve(["result": result])
                 } catch  {
-                    call.reject("Unexpected response type error: \(error)")
+                    do {
+                        let result = try response.result(as: Array<String>.self);
+                        call.resolve(["result": result])
+                    } catch  {
+                        call.reject("Unexpected response type error: \(error)")
+                    }
                 }
             }
             
@@ -192,6 +195,8 @@ extension WalletConnectPlugin: WalletConnectDelegate {
     }
 
     func didChainChanged() {
+        print("ChainChnanged")
+        print(walletConnect.session.walletInfo!.chainId)
         self.notifyListeners("didChainChanged", data: ["chainId": walletConnect.session.walletInfo!.chainId])
     }
 }
